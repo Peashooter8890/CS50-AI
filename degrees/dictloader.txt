@@ -1,0 +1,24 @@
+# Declare frontier
+frontier = StackFrontier()
+frontier = QueueFrontier(frontier)
+
+# Add our source person to node
+node = Node(source, None, None)
+frontier.add(node)
+
+# Until person is found
+while True:
+    # Call NFP() on frontier node
+    parent = frontier.remove()
+
+    # If target found, quit & return path
+    if parent.state == target:
+        return find_path(source, parent)
+
+    # Get children of the parent node
+    neighbors = NFP(parent.state)
+
+    # Load all neighbors of node into frontier
+    for neighbor in neighbors:
+        node = Node(neighbor[1], parent, neighbor[0])
+        frontier.add(node)
