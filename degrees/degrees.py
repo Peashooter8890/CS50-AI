@@ -83,14 +83,12 @@ def main():
             print(f"{i + 1}: {person1} and {person2} starred in {movie}")
 
 def find_path(source, node, path):
-    # Store (movie_id, person_id) in path
-    list = [node.action,node.state]
-    path.insert(0,list)
-
-    # If at end of path return, else recursively iterate
+    # If at end of path, return (don't store source); else recursively iterate
     if node.state == source:
         return path
     else:
+        list = [node.action,node.state]
+        path.insert(0,list)
         node = node.parent
         return find_path(source, node, path)
 
@@ -103,24 +101,21 @@ def shortest_path(source, target):
     """
 
     # Declare frontier
-    frontier = StackFrontier()
-    frontier = QueueFrontier(frontier)
+    frontier = QueueFrontier()
 
     # Add our source person to node
     node = Node(source, None, None)
     frontier.add(node)
 
-    # Until person is found
     while True:
-        # Call NFP() on frontier node
-        parent = frontier.remove()
-
         # If target found, quit & return path
+        parent = frontier.remove()
         if parent.state == target:
-            return find_path(source, parent)
+            path = []
+            return find_path(source, parent, path)
 
-        # Get children of the parent node
-        neighbors = NFP(parent.state)
+        # Call NFP() on frontier node
+        neighbors = neighbors_for_person(parent.state)
 
         # Load all neighbors of node into frontier
         for neighbor in neighbors:
