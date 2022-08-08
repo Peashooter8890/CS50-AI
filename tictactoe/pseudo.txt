@@ -1,0 +1,14 @@
+player() returns what turn it is (X always starts first)
+actions() returns a set of tuples(row,col) that represent empty tiles in the board
+result() returns a copy of the original board after the new move (Deep copy, aka EVERYTHING is a copy)
+    note that it takes actions() as argument; invalid action will raise exception
+winner() checks the board state and returns X or O if X or O won the game
+terminal() checks board and returns true if game is over (check board for draw states, check winner() for win states)
+utility() checks a board where the game is over and returns 1 if X won, -1 if O won, and 0 if draw.
+minimax() computes the next best move using utility() and general minimax logic and returns tuple of the next best move
+
+player() implementation:
+    var counter starts at 0. counter gets updated every time a move is made. if even, X. if odd, O.
+
+actions() implementation:
+    
