@@ -7,8 +7,92 @@ terminal() checks board and returns true if game is over (check board for draw s
 utility() checks a board where the game is over and returns 1 if X won, -1 if O won, and 0 if draw.
 minimax() computes the next best move using utility() and general minimax logic and returns tuple of the next best move
 
-player() implementation:
-    var counter starts at 0. counter gets updated every time a move is made. if even, X. if odd, O.
+player(board) implementation:
+    moves = actions(board)
 
-actions() implementation:
+    if (len(moves) %2 != 0):
+        return X
+    else:
+        return O
+
+actions(board) implementation:
+    set = ()
+    for each col in each row:
+        if (row,col) == EMPTY:
+            set.append(tuple(row,col))
+    return set
+
+result(board,action) implementation:
+    boardCopy = copy.deepcopy(board)
     
+
+winner(board) implementation:
+    Xlist,Olist = []
+    for each row (i):
+        for each col (j):
+            if board[i,j] == X:
+                X.append(boardFiller(i,j))
+            if board[i,j] == O:
+                O.append(boardFiller(i,j))
+    if(winChecker(Xlist)):
+        return X
+    elif (winchecker(Xlist)):
+        return O
+    else:
+        return None
+
+    boardFiller(i,j) implementation:
+        if 1 == i == j:
+            return center
+        else if i == j:
+            return corner1
+        else if i + j == 2: 
+            return corner2
+        else if j == 1: 
+            return edge1
+        else if i == 1:
+            return edge2
+
+    winChecker(list) implementation:
+        if ‘center’ in list:
+            if len(set(list) != len(list):
+                return true
+        else:
+            if (all(x in list for x in ['corner1', 'corner2’, ('edge1' or 'edge2')])):
+                return true
+        else:
+            return false
+
+terminal(board) implementation:
+    moveList = actions(board)
+    if len(moveList) == 0:
+        return true
+    return false
+
+utility(board) implementation:
+    if winner(board) == X:
+        return 1
+    if winner(board) == O:
+        return -1
+    return 0
+
+minimax(board) implementation:
+    if (terminal(board)):
+        return None
+    return MAXVALUE(board)
+
+    MAXVALUE(state) implementation:
+        # state is just the board, but the name "state" is more relevant in MINMAX
+        if terminal(state):
+            return utility(state)
+        v = -math.inf
+        for action in ACTIONS(state):
+            v = max(v, MINVALUE(result(state,action)))
+    
+    MINVALUE(state) implementation:
+        # state is just the board, but the name "state" is more relevant in MINMAX
+        if terminal(state):
+            return utility(state)
+        v = math.inf
+        for action in ACTIONS(state):
+            v = min(v, MAXVALUE(result(state,action)))
