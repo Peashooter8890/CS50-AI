@@ -3,7 +3,7 @@ from telnetlib import X3PAD
 import math, copy, sys, random
 X = "X"
 O = "O"
-EMPTY = " "
+EMPTY = "E"
 
 def player(board):
     # get a set of remaining moves (tuples)
@@ -38,69 +38,74 @@ def result(board,action):
         boardCopy[action[0]][action[1]] = O
         return boardCopy
 
-def winChecker(matrix):
-    # Applies custom algorithm to check if winner exists :)
-    conditionX = True
-    conditionO = True
-    for i in range(len(matrix[0])):
-
-        if ((matrix[0][i] == 3) or (matrix[1][i] == 3)):
-            print("I found a 3!")
-            for m in matrix:
-                print(m)
-            return X
-
-        if ((matrix[2][i] == 3) or (matrix[3][i] == 3)):
-            print("I found a 3!")
-            for m in matrix:
-                print(m)
-            return O
-    
-    counter = 0
-    for m in matrix:
-        for num in m:
-            if (counter < 2):
-                if (num == 0):
-                    conditionX = False
-            else:
-                if(num == 0):
-                    conditionO = False
-        counter += 1
-
-    if (conditionX == True):
-        print("Top two rows of matrix has at least 1 number in it!")
-        for m in matrix:
-            print(m)
-        return X
-    elif (conditionO == True):
-        print("Bottom two rows of matrix has at least 1 number in it!")
-        for m in matrix:
-            print(m)
-        return O
-    else:
-        return None
-
 def winner(board):
-    # Initialize 4x3 matrix for col and row for both X and O
-    matrix = [
-        [0,0,0], # row for X
-        [0,0,0], # col for X
-        [0,0,0], # row for O
-        [0,0,0] # col for O
-    ]
+    # Initialize lists for X and O
+    Xlist = []
+    Olist = []
 
-    # For each tile, append to matrix.
+    # Calls boardFiller() on each tile other than EMPTY ones
+    # boardFiller() returns a string that depends on if tile is edge, center, or corner
+    # If tile has X, string appended for Xlist. Vice versa for O
     for row in range(len(board)):
         for col in range(len(board[0])):
             if board[row][col] == X:
-                matrix[0][row]+= 1
-                matrix[1][col]+= 1
+                Xlist.append(boardFiller(row,col))
             if board[row][col] == O:
-                matrix[2][row] += 1
-                matrix[3][col] += 1
+                Olist.append(boardFiller(row,col))
     
-    # Calls algorithm on matrix to determine if winner exists
-    return(winChecker(matrix))
+    # Calls algorithm on both lists to determine if winner exists
+    if (easyCaseChecker(Xlist)):
+        return X
+    elif (easyCaseChecker(Olist)):
+        return O
+    else:
+        for i in range(0,3,2):
+            matcherrow = []
+            matchercol = []
+            for j in range(3):
+                matcherrow.append(board[i][j])
+                matchercol.append(board[j][i])
+            if all(item == matcherrow[0] for item in matcherrow):
+                if(matcherrow[0] != EMPTY):
+                    return matcherrow[0]
+            if all(item == matchercol[0] for item in matchercol):
+                if(matchercol[0] != EMPTY):
+                    return matchercol[0]
+        return None
+
+def boardFiller(i,j):
+    # Checks tile location and returns corresponding string
+
+        # If tile is at center:
+        if 1 == i == j:
+            return 'center'
+        
+        # If tile is at upper left or lower right corner:
+        elif i == j:
+            return 'corner1'
+
+        # If tile is at upper right or lower left corner:
+        elif i + j == 2: 
+            return 'corner2'
+        
+        # if tile is at upper or lower edge:
+        elif j == 1: 
+            return 'edge1'
+
+        # if tile is at left or right edge:
+        elif i == 1:
+            return 'edge2'
+
+def easyCaseChecker(list):
+        # Applies custom algorithm to check easy cases :)
+
+        # If center exists:
+        if 'center' in list:
+            # If any duplicate items exist, there is a winner
+            if len(set(list)) != len(list):
+                return True
+        else:
+            return False
 
 def terminal(board):
     # Store set of moves (tuples)
@@ -108,10 +113,12 @@ def terminal(board):
 
     # If there are no moves in the set, game is over.
     if len(moves) == 0:
+        "No moves left :)"
         return True
     
     # If someone won the game, game is over.
     if (winner(board) != None):
+        print("Someone won the game!")
         return True
 
     # Else, game is not over.
@@ -157,7 +164,7 @@ def MINVALUE(state,pruning):
     
     v = math.inf
     for action in actions(state):
-        v = min(v, MAXVALUE(result(state,action)),pruning)
+        v = min(v, MAXVALUE(result(state,action),pruning,condition))
 
         # If v is smaller than max value, quit iterating
         if (v < pruning):
@@ -353,8 +360,11 @@ def testing(board,id):
         print(winner(board))
 
     # Test for minimax()
-
-        
+    if (id.lower() == 'minimax'):
+        print("Initiating test for minimax():")
+        for b in board:
+            print(b)
+        print(minimax(board))
 
 
 # Activate Main() for testing
