@@ -43,17 +43,39 @@ def winChecker(matrix):
     conditionX = True
     conditionO = True
     for i in range(len(matrix[0])):
-        if (matrix[0][i] or matrix[1][i] == 3):
+
+        if ((matrix[0][i] == 3) or (matrix[1][i] == 3)):
+            print("I found a 3!")
+            for m in matrix:
+                print(m)
             return X
-        if (matrix[2][i] or matrix[3][i] == 3):
+
+        if ((matrix[2][i] == 3) or (matrix[3][i] == 3)):
+            print("I found a 3!")
+            for m in matrix:
+                print(m)
             return O
-        if (matrix[0][i] and matrix[1][i] != 1):
-            conditionX = False
-        if (matrix[2][i] or matrix[3][i] != 1):
-            conditionO = False
+    
+    counter = 0
+    for m in matrix:
+        for num in m:
+            if (counter < 2):
+                if (num == 0):
+                    conditionX = False
+            else:
+                if(num == 0):
+                    conditionO = False
+        counter += 1
+
     if (conditionX == True):
+        print("Top two rows of matrix has at least 1 number in it!")
+        for m in matrix:
+            print(m)
         return X
     elif (conditionO == True):
+        print("Bottom two rows of matrix has at least 1 number in it!")
+        for m in matrix:
+            print(m)
         return O
     else:
         return None
@@ -70,10 +92,10 @@ def winner(board):
     # For each tile, append to matrix.
     for row in range(len(board)):
         for col in range(len(board[0])):
-            if col == X:
+            if board[row][col] == X:
                 matrix[0][row]+= 1
                 matrix[1][col]+= 1
-            if col == O:
+            if board[row][col] == O:
                 matrix[2][row] += 1
                 matrix[3][col] += 1
     
@@ -143,6 +165,23 @@ def MINVALUE(state,pruning):
             return v
     return v
 
+def minimax(board):
+    # If game is over, quit.
+    if (terminal(board)):
+        return None
+    
+    # Alpha Beta Pruning - declare variable to keep track of maximum values
+    # If any value is less than maximum value, quit search immediately
+    pruning = -math.inf
+
+    # We need to receive the tuple that gives us the best move.
+    # MAXVALUE() returns v values for recursion. We need a condition variable that will
+    # only activate at the end of the first activation of MAXVALUE(). 
+    condition = 1
+
+    # Return most optimal move using minimax algorithm
+    return(MAXVALUE(board,pruning,condition))
+
 def randomBoard(board):
     for i in range(len(board)):
             for j in range(len(board[i])):
@@ -203,22 +242,34 @@ def main():
     if (id.lower() == 'custom'):
         print("Welcome to custom testing services.\n")
         print("Invalid inputs will cause an error later, so please be sure to type the correct inputs. \n")
-        same_board = input("Would you like to use the same board for each test? Please type 'y' or 'yes' if so. \n")
+        same_board = input("Would you like to use only one board for each test? Please type 'y' or 'yes' if so. \n")
         if (same_board.lower() == ('y' or 'yes')):
-            board_id = input("\nAll boards will be the same. Please input board_id for the boards: ")
-            board = boardGenerator(board_id)
+            testingBoards = []
+            testingBoards.append(input("All boards will be the same. Please input board_id for the boards: "))
         else:
-            print("\nBoard_id will be different for each test.")
-        iteration = input("Would you like to iterate each test a different number of times? Please type 'y' or 'yes' if so. \n")
-        if (iteration.lower() == ('y' or 'yes')):
-            print("\nEach tests, by themselves, will repeat once.")
+            print("All tests will repeat for multiple boards.")
+            print("Please input the board_ids for each board that you would like to perform your tests on.")
+            testingBoards = []
+            while True:
+                testingBoard = input("Please enter board_id (or 'quit' if you are done). Enter 'all' to test on all boards.\n")
+                if(testingBoard.lower() == 'quit'):
+                    break
+                if(testingBoard.lower() == 'all'):
+                    testingBoards = ['empty', 'random', 'vertical', 'horizontal', 'diagonal']
+                    break
+                testingBoards.append(testingBoard)
+
+        iteration = input("\nWould you like to iterate each test a different number of times? Please type 'y' or 'yes' if so.\n")
+        if (iteration.lower() != ('y' or 'yes')):
+            print("Each tests, by themselves, will repeat once.\n")
         else:
-            print("\nIteration count will be different for each test.")
+            print("Iteration count will be different for each test.\n")
+
         repeat_id = int(input("How many times would you like to repeat the sequences of your tests? \n"))
         print(f"Your custom test will be repeated {repeat_id} times. \n")
         
         tests = []
-        print("Please input the test_id for each tests that you would like to perform. ")
+        print("Please input the test_id for each tests that you would like to perform.")
         while True:
             test = []
             quitcheck = input("Please input test id (or 'quit' if you are done): ")
@@ -226,11 +277,6 @@ def main():
                 print("\n Test input finished. Executing tests... \n")
                 break
             test.append(quitcheck)
-            if (same_board.lower() != ('y' or 'yes')):
-                print(same_board)
-                test.append(input("\nPlease input board id for your test: "))
-            else:
-                test.append("none")
             if (iteration.lower() == ('y' or 'yes')):
                 test.append(int(input("\nPlease input iteration count for your test: ")))
             else:
@@ -243,23 +289,18 @@ def main():
                 print("\n")
                 print(f"CUSTOM TEST SEQUENCE {repeat + 1}")
                 print("\n")
-            for test in tests:
-                if (test[2] != ("none" or 1)):
-                    for i in range(test[2]):
-                        print(f"Subtest number {i + 1}")
-                        if (same_board.lower() == ('y' or 'yes')):
+            for testBoard in testingBoards:
+                board = boardGenerator(testBoard)
+                for test in tests:
+                    print(f"Board: {testBoard}")
+                    if (test[1] != ("none" or 1)):
+                        for i in range(test[1]):
+                            print(f"Subtest number {i + 1}")
                             testing(board, test[0])
-                        else:
-                            board = boardGenerator(test[1])
-                            testing(board, test[0])
-                        print("\n")
-                else:
-                    if (same_board.lower() == ('y' or 'yes')):
-                        testing(board, test[0])
+                            print("\n")
                     else:
-                        board = boardGenerator(test[1])
                         testing(board, test[0])
-                    print("\n")
+                        print("\n")
     else:
         try:
             board_id = sys.argv[2]
@@ -306,9 +347,13 @@ def testing(board,id):
         for i in range(len(board)):
             print(board[i])
     
+    # Test for winner()
     if (id.lower() == 'winner'):
         print("Initiating test for winner():")
         print(winner(board))
+
+    # Test for minimax()
+
         
 
 
