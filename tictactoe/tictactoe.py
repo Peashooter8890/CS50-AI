@@ -3,6 +3,7 @@ Tic Tac Toe Player
 """
 
 import math
+import copy
 
 X = "X"
 O = "O"
@@ -16,21 +17,6 @@ def initial_state():
     return [[EMPTY, EMPTY, EMPTY],
             [EMPTY, EMPTY, EMPTY],
             [EMPTY, EMPTY, EMPTY]]
-
-
-def player(board):
-    """
-    Returns player who has the next turn on a board.
-    """
-    raise NotImplementedError
-
-
-def actions(board):
-    """
-    Returns set of all possible actions (i, j) available on the board.
-    """
-    raise NotImplementedError
-
 
 def result(board, action):
     """

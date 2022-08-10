@@ -8,68 +8,116 @@ utility() checks a board where the game is over and returns 1 if X won, -1 if O 
 minimax() computes the next best move using utility() and general minimax logic and returns tuple of the next best move
 
 player(board) implementation:
+    # get a set of remaining moves (tuples)
     moves = actions(board)
 
+    # if odd number of moves left, X's turn. Else, O's turn.
     if (len(moves) %2 != 0):
         return X
     else:
         return O
 
 actions(board) implementation:
-    set = ()
-    for each col in each row:
-        if (row,col) == EMPTY:
-            set.append(tuple(row,col))
-    return set
+    # Initalize empty set
+    moves = set()
+
+    # Load all possible moves into set, then return set
+    for row in board:
+        for col in row:
+        if board[row,col] == EMPTY:
+            moves.add((row,col))
+    return moves
 
 result(board,action) implementation:
+    # Make deep copy of board
     boardCopy = copy.deepcopy(board)
-    
+
+    # Execute action for current turn player on new board, then return new board
+    if player(board) == X:
+        boardCopy[action[0]][action[1]] = X
+        return boardCopy
+    else:
+        boardCopy[action[0]][action[1]] = O
+        return boardCopy
 
 winner(board) implementation:
+    # Initialize lists for X and O
     Xlist,Olist = []
-    for each row (i):
-        for each col (j):
-            if board[i,j] == X:
-                X.append(boardFiller(i,j))
-            if board[i,j] == O:
-                O.append(boardFiller(i,j))
+
+    # Calls boardFiller() on each tile other than EMPTY ones
+    # boardFiller() returns a string that depends on if tile is edge, center, or corner
+    # If tile has X, string appended for Xlist. Vice versa for O
+    for row in board:
+        for col in row:
+            if board[row,col] == X:
+                X.append(boardFiller(row,col))
+            if board[row,col] == O:
+                O.append(boardFiller(row,col))
+    
+    # Calls algorithm on both lists to determine if winner exists
     if(winChecker(Xlist)):
         return X
-    elif (winchecker(Xlist)):
+    elif (winchecker(Olist)):
         return O
     else:
         return None
 
     boardFiller(i,j) implementation:
+    # Checks tile location and returns corresponding string
+
+        # If tile is at center:
         if 1 == i == j:
-            return center
+            return 'center'
+        
+        # If tile is at lower left or upper right corner:
         else if i == j:
-            return corner1
+            return 'corner1'
+
+        # If tile is at upper left or lower right corner:
         else if i + j == 2: 
-            return corner2
+            return 'corner2'
+        
+        # if tile is at upper or lower edge:
         else if j == 1: 
-            return edge1
+            return 'edge1'
+
+        # if tile is at left or right edge:
         else if i == 1:
-            return edge2
+            return 'edge2'
 
     winChecker(list) implementation:
+        # Applies custom algorithm to check if winner exists :)
+
+        # If center exists:
         if ‘center’ in list:
+            # If any duplicate items exist, there is a winner
             if len(set(list) != len(list):
-                return true
+                return True
         else:
+            # If both corners and one of either edge exists, there is a winner
             if (all(x in list for x in ['corner1', 'corner2’, ('edge1' or 'edge2')])):
-                return true
+                return True
         else:
-            return false
+            # Every other case has no winner
+            return False
 
 terminal(board) implementation:
-    moveList = actions(board)
-    if len(moveList) == 0:
-        return true
-    return false
+    # Store set of moves (tuples)
+    moves = actions(board)
+
+    # If there are no moves in the set, game is over.
+    if len(moves) == 0:
+        return True
+    
+    # If someone won the game, game is over.
+    if (winner(board) != None):
+        return True
+
+    # Else, game is not over.
+    return False
 
 utility(board) implementation:
+    # If X won, return 1. If draw, return 0. If O won, return -1.
     if winner(board) == X:
         return 1
     if winner(board) == O:
@@ -77,22 +125,57 @@ utility(board) implementation:
     return 0
 
 minimax(board) implementation:
+    # If game is over, quit.
     if (terminal(board)):
         return None
-    return MAXVALUE(board)
+    
+    # Alpha Beta Pruning - declare variable to keep track of maximum values
+    # If any value is less than maximum value, quit search immediately
+    pruning = -math.inf
 
-    MAXVALUE(state) implementation:
-        # state is just the board, but the name "state" is more relevant in MINMAX
+    # We need to receive the tuple that gives us the best move.
+    # MAXVALUE() returns v values for recursion. We need a condition variable that will
+    # only activate at the end of the first activation of MAXVALUE(). 
+    condition = 1
+
+    # Return most optimal move using minimax algorithm
+    maxvalue = MAXVALUE(board,pruning,condition)
+
+    MAXVALUE(state,pruning,condition) implementation:
+        # Returns most optimal move
+        # state is just a fancy name for board
+
+        # If game is over in simulation, return utility value
         if terminal(state):
             return utility(state)
+
+        # Recursively iterate through every move and assign v the best one
         v = -math.inf
         for action in ACTIONS(state):
-            v = max(v, MINVALUE(result(state,action)))
+            v = max(v, MINVALUE(result(state,action),pruning))
+
+            # Assign max value to pruning variable
+            if (v > pruning):
+                tupl = action
+                pruning = v
+        if (condition = 1):
+            return tupl
+        else:
+            return v
     
     MINVALUE(state) implementation:
+        # From this point forward, MAXVALUE() shall not return tuples
+        condition = 0
+
         # state is just the board, but the name "state" is more relevant in MINMAX
         if terminal(state):
             return utility(state)
+        
         v = math.inf
         for action in ACTIONS(state):
-            v = min(v, MAXVALUE(result(state,action)))
+            v = min(v, MAXVALUE(result(state,action)),pruning)
+
+            # If v is smaller than max value, quit iterating
+            if (v < pruning):
+                return v
+        return v
