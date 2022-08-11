@@ -113,12 +113,10 @@ def terminal(board):
 
     # If there are no moves in the set, game is over.
     if len(moves) == 0:
-        "No moves left :)"
         return True
     
     # If someone won the game, game is over.
     if (winner(board) != None):
-        print("Someone won the game!")
         return True
 
     # Else, game is not over.
@@ -133,6 +131,7 @@ def utility(board):
     return 0
     
 def MAXVALUE(state,pruning,condition):
+    mincondition = 0
     # Returns most optimal move
     # state is just a fancy name for board
 
@@ -143,7 +142,7 @@ def MAXVALUE(state,pruning,condition):
     # Recursively iterate through every move and assign v the best one
     v = -math.inf
     for action in actions(state):
-        v = max(v, MINVALUE(result(state,action),pruning))
+        v = max(v, MINVALUE(result(state,action),pruning,mincondition))
 
         # Assign max value to pruning variable
         if (v > pruning):
@@ -154,9 +153,9 @@ def MAXVALUE(state,pruning,condition):
     else:
         return v
     
-def MINVALUE(state,pruning):
+def MINVALUE(state,pruning,condition):
     # From this point forward, MAXVALUE() shall not return tuples
-    condition = 0
+    maxcondition = 0
 
     # state is just the board, but the name "state" is more relevant in MINMAX
     if terminal(state):
@@ -164,13 +163,18 @@ def MINVALUE(state,pruning):
     
     v = math.inf
     for action in actions(state):
-        v = min(v, MAXVALUE(result(state,action),pruning,condition))
-
+        c_action = min(v, MAXVALUE(result(state,action),pruning,maxcondition))
+        if (c_action < v):
+            tupl = action
+        v = c_action
         # If v is smaller than max value, quit iterating
-        if (v < pruning):
-            print(f"Uh-oh! {v} is less than our maximum node, {pruning}. Protocol exit.")
-            return v
-    return v
+        if (condition != 1):
+            if (v < pruning):
+                return v
+    if (condition == 1):
+        return tupl
+    else:
+        return v
 
 def minimax(board):
     # If game is over, quit.
@@ -187,7 +191,10 @@ def minimax(board):
     condition = 1
 
     # Return most optimal move using minimax algorithm
-    return(MAXVALUE(board,pruning,condition))
+    if(player(board) == X):
+        return(MAXVALUE(board,pruning,condition))
+    else:
+        return(MINVALUE(board,pruning,condition))
 
 def randomBoard(board):
     for i in range(len(board)):
@@ -362,6 +369,7 @@ def testing(board,id):
     # Test for minimax()
     if (id.lower() == 'minimax'):
         print("Initiating test for minimax():")
+        print(player(board) + "'s turn")
         for b in board:
             print(b)
         print(minimax(board))
