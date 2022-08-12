@@ -12,27 +12,27 @@ Ex.
 -->
 {C,D} = 2
 
-known_mines():
+def known_mines():
     # If the number of mines are equal to number of cells, all of them are mines.
     if len(self.cells) == self.count:
         return self.cells
     else:
         return set()
 
-known_safe():
+def known_safe():
     # If there are no mines nearby, all of the cells are safes. 
     if self.count == 0:
         return self.cells
     else:
         return set()
 
-mark_mine(cell):
+def mark_mine(cell):
     # Subtract cell and count from original sentence
     if cell in self.cells:
         self.cells.remove(cell)
         self.count -= 1
 
-mark_safe(cell):
+def mark_safe(cell):
     # Subtract only cell, but not count
     if cell in self.cells:
         self.cells.remove(cell)
@@ -64,7 +64,7 @@ def eliminateSubsets(sets):
                     sentence.cells -= subsentence.cells
                     sentence.count -= subsentence.count
 
-add_knowledge(cell,count):
+def add_knowledge(cell,count):
     # Record the cell as one of the moves made
     self.moves_made.add(cell)
 
@@ -107,3 +107,11 @@ add_knowledge(cell,count):
         if (change == 0):
             break
 
+def make_safe_move():
+    return random.choices(self.safes)
+
+def make_random_move():
+    uncertainty = set()
+    for sentence in self.knowledge:
+        uncertainty.add(sentence.cells)
+    return random.choice(uncertainty)
