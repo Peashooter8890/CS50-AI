@@ -1,0 +1,109 @@
+1. Sentence implementation
+
+Sentence is a class with a set of cells and a count. 
+
+{A,B,C} = cells (mysterious tiles)
+count is a number that represents a number of a revealed safe cell that we are currently on. 
+
+Ex. 
+
+{A,B,C,D} = 2
+{A,B} = 0
+-->
+{C,D} = 2
+
+known_mines():
+    # If the number of mines are equal to number of cells, all of them are mines.
+    if len(self.cells) == self.count:
+        return self.cells
+    else:
+        return set()
+
+known_safe():
+    # If there are no mines nearby, all of the cells are safes. 
+    if self.count == 0:
+        return self.cells
+    else:
+        return set()
+
+mark_mine(cell):
+    # Subtract cell and count from original sentence
+    if cell in self.cells:
+        self.cells.remove(cell)
+        self.count -= 1
+
+mark_safe(cell):
+    # Subtract only cell, but not count
+    if cell in self.cells:
+        self.cells.remove(cell)
+
+
+
+cellLoader checks all neighbors and loads them if they are not known to be safe or a mine:
+
+def cellLoader(matrix,i,j):
+    cells = set()
+    for x in range(i-1,i+2):
+        for y in range(i-1,i+2):
+            if(not(x==i and y==j)):
+                try:
+                    if(x >= 0 and y >= 0):
+                        if not((x,y) in (self.mines or self.safes):
+                            cells.add(board[x][y])
+                except:
+                    pass
+    return cells
+
+
+def eliminateSubsets(sets):
+    # Eliminate subsets (Tested Function) 
+    for sentence in sets:
+        for subsentence in sets:
+            if sentence != subsentence:
+                if subsentence.cells.issubset(sentence.cells):
+                    sentence.cells -= subsentence.cells
+                    sentence.count -= subsentence.count
+
+add_knowledge(cell,count):
+    # Record the cell as one of the moves made
+    self.moves_made.add(cell)
+
+    # Mark cell as safe
+    self.mark_safe(cell)
+
+    # Make sentence out of the cell's surrounding neighbors and mine count, add it to AI's knowledge base
+    neighbors = cellLoader(cell)
+    sentence = Sentence(neighbors,count)
+    self.knowledge.append(sentence)
+
+    # Add all sentences to rule. Execute subset elimination to create new inferences.
+    sets = set()
+    for sentence in sentences:
+        sets.add(sentence)
+
+    while(True):
+        # Keep track of change
+        change = 0
+
+        # Eliminate subsets
+        eliminateSubsets(sets)
+
+        # Check if any tiles are confident to be a mine or a safe.
+        for sentence in sentences:
+            # If a sentence confirms that a cell is mine, then mark it as mine
+            mines = sentence.known_mines()
+            if (len(mines) > 0):
+                change = 1
+                for mine in mines:
+                    self.mark_mine(item)
+
+            # If a sentence confirms that a cell is safe, then add it to knowledge base (recursive method)
+            safes = sentence.known_safes()
+            if (len(safes) > 0):
+                change = 1
+                for item in safe:
+                    add_knowledge(item,item.count)
+        
+        if (change == 0):
+            break
+
