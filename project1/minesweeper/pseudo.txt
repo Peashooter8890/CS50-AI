@@ -1,17 +1,3 @@
-1. Sentence implementation
-
-Sentence is a class with a set of cells and a count. 
-
-{A,B,C} = cells (mysterious tiles)
-count is a number that represents a number of a revealed safe cell that we are currently on. 
-
-Ex. 
-
-{A,B,C,D} = 2
-{A,B} = 0
--->
-{C,D} = 2
-
 def known_mines():
     # If the number of mines are equal to number of cells, all of them are mines.
     if len(self.cells) == self.count:
@@ -37,8 +23,6 @@ def mark_safe(cell):
     if cell in self.cells:
         self.cells.remove(cell)
 
-
-
 cellLoader checks all neighbors and loads them if they are not known to be safe or a mine:
 
 def cellLoader(matrix,i,j):
@@ -49,7 +33,7 @@ def cellLoader(matrix,i,j):
                 try:
                     if(x >= 0 and y >= 0):
                         if not((x,y) in (self.mines or self.safes):
-                            cells.add(board[x][y])
+                            cells.add((x,y))
                 except:
                     pass
     return cells
@@ -108,10 +92,21 @@ def add_knowledge(cell,count):
             break
 
 def make_safe_move():
+    # Randomly choose from safe moves :)
     return random.choices(self.safes)
 
 def make_random_move():
+    # Combine all uncertain cells in sentences into a set, then randomly chooes from them.
     uncertainty = set()
     for sentence in self.knowledge:
         uncertainty.add(sentence.cells)
     return random.choice(uncertainty)
+
+
+
+
+Write new function that instead returns tuples of nearby elements of 8x8 board
+
+i,j, 5
+
+i,j is safe
