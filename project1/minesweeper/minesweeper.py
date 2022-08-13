@@ -1,5 +1,5 @@
-import itertools
 import random
+from termcolor import colored
 
 
 class Minesweeper():
@@ -158,7 +158,7 @@ class MinesweeperAI():
         self.safes = set()
 
         # List of sentences about the game known to be true
-        self.knowledge = set()
+        self.knowledge = []
 
     def mark_mine(self, cell):
         """
@@ -191,10 +191,13 @@ class MinesweeperAI():
                     # If a tile's indices are not out of bounds:
                     if (x >= 0 and y >= 0):
                         if (x <= 7 and y <= 7):
-                            # If a tile is not already a mine or a safe:
-                            if not((x,y) in (self.mines or self.safes)):
-                                # Store cell in the set cells.
-                                cells.add((x,y))
+                            # If a tile is not already a mine or a safe or a made move:
+                            if not((x,y) in (self.mines)):
+                                if not ((x,y) in (self.safes)):
+                                    if not ((x,y) in (self.moves_made)):
+                                        # Store cell in the set cells.
+                                        cells.add((x,y))
+        #print(colored(f"If this set is not empty, then your program has errors: set({cells.intersection(self.moves_made)})","cyan"))
         return cells
 
     def eliminateSubsets(self):
@@ -208,11 +211,29 @@ class MinesweeperAI():
                         if (len(sentence.cells) != 0 and len(subsentence.cells) != 0):
                             # If a sentence is a subset of our sentence:
                             if (subsentence.cells.issubset(sentence.cells)):
-                                print(f"Because {subsentence} is a subset of {sentence}, I will execute set elimination :D")
+                                print(colored(f"Because {subsentence} is a subset of {sentence}, I will execute set elimination :D",'yellow'))
                                 sentence.cells -= subsentence.cells
                                 temp = sentence.count - subsentence.count
                                 sentence.count = temp
-                                print(f"Now the two sets are: {subsentence} and {sentence}")
+                                print(colored(f"Now the two sets are: {subsentence} and {sentence}",'yellow'))
+
+    def mineCounter(self,cell):
+        # Stores i and j as row and column. Initiate set cells to store all valid neighbor cells.
+        i = cell[0]
+        j = cell[1]
+        counter = 0
+        # For each tile in the 9x9 area:
+        for x in range(i-1,i+2):
+            for y in range(j-1,j+2):
+                # If tile is a neighbor and not itself:
+                if (not(x==i and y==j)):
+                    # If a tile's indices are not out of bounds:
+                    if (x >= 0 and y >= 0):
+                        if (x <= 7 and y <= 7):
+                            # If a tile is a mine, add to counter.
+                            if ((x,y) in (self.mines)):
+                                counter += 1
+        return counter
 
     def add_knowledge(self, cell, count):
         """
@@ -237,16 +258,25 @@ class MinesweeperAI():
 
         # Make sentence out of the cell's surrounding neighbors and mine count, add it to AI's knowledge base
         neighbors = self.cellLoader(cell)
-        sentence = Sentence(neighbors,int(count))
-        #print(f"Our new sentence is: {sentence}")
-        self.knowledge.add(sentence)
+        mines_count = self.mineCounter(cell)
+
+        # Using count is problematic - already catched mines can be repetiviely included.
+        sentence = Sentence(neighbors, (count-mines_count))
+        print(colored(f"Our new sentence is: {sentence}",'green'))
+        self.knowledge.append(sentence)
+
+        # Print sentences for debugging :D
+        temp = []
+        [temp.append(x) for x in self.knowledge if x not in temp]
+        self.knowledge = temp
+        print(colored("\nBELOW IS THE LIST OF SENTENCES AVAILIABLE NOW",'green'))
+        for sentence in self.knowledge:
+            #print(colored(f"If this set is not empty, then your program has errors: set({(sentence.cells).intersection(self.moves_made)})","cyan"))
+            print(sentence)
 
         while True:
             change = 0
-
-            # Eliminate subsets
-            self.eliminateSubsets()
-
+            
             # Check if any tiles are confident to be a mine or a safe.
             for sentence in self.knowledge:
                 # If a sentence confirms that a cell is mine, then mark it as mine
@@ -254,21 +284,38 @@ class MinesweeperAI():
                 if (len(mines) > 0):
                     change = 1
                     for mine in mines:
+                        print(colored(f"{mine} is a mine.",'blue'))
                         self.mark_mine(mine)
+                if (change == 1):
+                    temp = []
+                    [temp.append(x) for x in self.knowledge if x not in temp]
+                    self.knowledge = temp
+                    print(colored("\nMINE DISCOVERED!. BELOW IS THE LIST OF UPDATED SENTENCES AVAILIABLE NOW",'green'))
+                    for sentence in self.knowledge:
+                        #print(colored(f"If this set is not empty, then your program has errors: set({(sentence.cells).intersection(self.moves_made)})","cyan"))
+                        print(sentence)
+            
+                # Eliminate subsets. Do this after mark_mine to avoid negative set conflict. (Debugged)
+                self.eliminateSubsets()
 
                 # If a sentence confirms that a cell is safe, then add it to knowledge base (recursive method)
                 safes = sentence.known_safes().copy()
                 if (len(safes) > 0):
-                    change = 1
+                    change = 2
                     for safe in safes:
                         #print(f"Marking {safe} as safe :)")
                         self.mark_safe(safe)
+                if (change == 2):
+                    temp = []
+                    [temp.append(x) for x in self.knowledge if x not in temp]
+                    self.knowledge = temp
+                    print(colored("\nSAFE TILE DISCOVERED. BELOW IS THE LIST OF UPDATED SENTENCES AVAILIABLE NOW",'green'))
+                    for sentence in self.knowledge:
+                        #print(colored(f"If this set is not empty, then your program has errors: set({(sentence.cells).intersection(self.moves_made)})","cyan"))
+                        print(sentence)
             if (change == 0):
                 break
         #print(f"Availiable moves are now: {self.safes - self.moves_made}")
-        print("BELOW IS THE LIST OF SENTENCES AVAILIABLE NOW")
-        for sentence in self.knowledge:
-            print(sentence)
 
     def make_safe_move(self):
         """

@@ -1,9 +1,11 @@
 import pygame
 import sys
 import time
+from termcolor import colored
 
 from minesweeper import Minesweeper, MinesweeperAI
 
+print(colored("DEBUGGING SESSION: START!",'red'))
 HEIGHT = 8
 WIDTH = 8
 MINES = 8
@@ -219,5 +221,4 @@ while True:
             print(move)
             revealed.add(move)
             ai.add_knowledge(move, nearby)
-
     pygame.display.flip()
